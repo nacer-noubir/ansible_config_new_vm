@@ -1,0 +1,18 @@
+- name: configure firewall
+  hosts: workers
+  become: yes
+  tasks:
+    - name: install firewalld
+      yum:
+        name: firewalld
+        state: present
+    - name: allow https
+      firewalld:
+        service: https
+        permanent: true
+        state: enabled
+    - name: allow ssh
+      firewalld:
+        service: ssh
+        permanent: true
+        state: enabled

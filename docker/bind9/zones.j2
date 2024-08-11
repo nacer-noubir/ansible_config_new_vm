@@ -1,0 +1,23 @@
+$TTL 86400
+
+@ IN SOA ns.{{ domain_data.domain }}. admin.{{ domain_data.domain }}. (
+
+  2023082001 ; Serial
+
+  3600       ; Refresh
+
+  1800       ; Retry
+
+  604800     ; Expire
+
+  86400 )    ; Minimum
+
+@ IN NS ns.{{ domain_data.domain }}.
+
+ns IN A {{ nameserver_ip }}
+
+{% for record_data in domain_data.records %}
+
+{{ record_data.host }} IN {{ record_data.type}} {{ record_data.ip }}
+
+{% endfor %}

@@ -1,0 +1,24 @@
+---
+- hosts: control
+  become: yes
+  name: Install latest powershell 7 on rhl
+  tasks:
+    - name: update all packages
+      yum:
+        name: '*'
+        state: latest
+
+    - name: Install required
+      yum:
+        name:
+          - apt-transport-https
+          - software-properties-common
+        state: present
+    
+    - name: Get latest Powershell release version
+      uri:
+        url: https://api.github.com/repos/PowerShell/PowerShell/releases/latest
+        method: Get
+        return_content: yes
+        status_code: 200
+      register: release_json

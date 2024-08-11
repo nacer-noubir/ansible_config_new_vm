@@ -1,0 +1,12 @@
+- name: Create and configure User
+  hosts: workers
+  tasks:
+    - name: create service account group
+      group:
+        name: service_accounts
+        state: present
+  
+    - name: Create User
+      user:
+        name: worker
+        groups: service_accounts

@@ -1,0 +1,55 @@
+- name: Create and configure User
+  hosts: workers
+  become: yes
+  vars:
+    service_account_name: worker
+    service_account_password: 
+    service_account_shell: /bin/bash
+    service_account_home: /home/worker
+    service_account_group: service_group
+    ssh_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+  tasks:
+    - name: create service account group
+      group:
+        name: "{{service_account_group}}"
+        state: present
+  
+    - name: Create User
+      user:
+        name: "{{ service_account_name }}"
+        groups: "{{ service_account_group }}"
+        password: "{{ service_account_password | password_hash('sha512') }}"
+        shell: "{{ service_account_shell}}"
+        home: "{{ service_account_home }}"
+        createhome: yes
+
+    - name: Set up SSH directory
+      file:
+        path: "{{ service_account_name }}/.ssh"
+        state: directory
+        owner: "{{ service_account_name }}"
+        group: "{{ service_account_group }}"
+        mode: '0700'
+    
+    - name: Add SSH key to authorized keys
+      authorized_key:
+        user: "{{ service_account_name }}"
+        state: present
+        key: "{{ ssh_key }}"
+    
+    - name: Set up permission for the home directory
+      file:
+        path: "{{ service_account_home }}"
+        state: directory
+        owner: "{{ service_account_name }}"
+        group: "{{ service_account_group }}"
+        mode: '0750'
+    
+    - name: Create a welcome message
+      copy:
+        content: |
+          Welcome to your new service account, {{ service_account_name }}!
+        dest: "{{ service_account_home }}/welcome.txt"
+        owner: "{{ service_account_name }}"
+        group: "{{ service_account_group }}"
+        mode: '0644'

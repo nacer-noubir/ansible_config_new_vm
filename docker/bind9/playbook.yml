@@ -1,0 +1,34 @@
+- name: Install and Configure bind DNS
+  hosts: dns_servers
+  tasks:
+    - name: Install bind9
+      apt:
+        name: bind9
+        state: present
+      become: true
+    - name: Configure named.conf.options
+      template:
+        src: named.conf.options.j2
+        dest: /etc/bind/named.conf.options
+      register: named_conf_change
+      become: true
+    - name: Deploy zone file using jinja2 template
+      template:
+        src: zone.j2
+        dest: /etc/bind/{{ item.domain }}.zone
+      loop: "{{ domains }}"
+      vars:
+        domain_data: "{{ item }}"
+        nameserver_ip: "{{ ansible_host }}"
+      register: zone_file_changed
+      become: true
+    - name: Reload zone files
+      ansible.builtin.shell: rndc reload
+      when: zone_file_change.changed
+      become: true
+    - name: restart bind dns
+      service:
+        name: bind9
+        state: restarted
+      when: named_conf_change.changed
+      become: true
