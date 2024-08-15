@@ -12,7 +12,7 @@ pipeline {
                 """
             }
         }
-          stage('Code Checkout') {
+          stage('Checkout') {
             steps {
                 checkout([
                     $class: 'GitSCM',
