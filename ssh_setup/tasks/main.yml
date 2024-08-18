@@ -1,0 +1,39 @@
+
+  - name: Set up SSH directory
+    file:
+      path: "/home/{{ item }}/.ssh"
+      state: directory
+      owner: "{{ item }}"
+      mode: '0700'
+    with_items: "{{ users }}"
+
+  - name: Add SSH key to authorized keys
+    authorized_key:
+      user: "{{ item }}"
+      state: present
+      key: "{{ ssh_key }}"
+    with_items: "{{ users }}"
+
+
+##-----------------------
+  - name: collect sshd configs
+    ansible.builtin.find:
+      paths: /etc/ssh/sshd_config.d
+      patterns: '*.conf'
+      file_type: file
+    register: collected_info
+
+  - name: update sshd conf
+    copy:
+      dest: "{{ item.path }}"
+      content: "PasswordAuthentication no\n"
+    with_items: "{{ collected_info.files }}"
+    register: update_result
+  
+  - name: restart sshd
+    service:
+      name: sshd
+      state: restarted
+    when: update_result.changed
+
+      

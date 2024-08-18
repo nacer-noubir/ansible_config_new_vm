@@ -1,0 +1,16 @@
+- name: Ensure a secure and up-to-date system
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update apt package index
+      yum:
+        update_cache: yes
+
+    - name: Upgrade all packages
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Remove unused packages and dependencies
+      yum:
+        autoremove: yes

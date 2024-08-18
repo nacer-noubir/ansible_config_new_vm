@@ -1,0 +1,11 @@
+- hosts: all
+  name: Access setup
+  roles:
+    - { role: user_access_management, tags: user_access_management }
+  become: true
+
+- hosts: all
+  name: ssh setup
+  roles:
+  - { role: ssh_setup, tags: ssh_setup}
+  become: true

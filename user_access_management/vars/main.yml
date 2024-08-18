@@ -1,0 +1,8 @@
+service_account_name: worker
+service_account_password: whatever
+service_account_shell: /bin/bash
+service_account_home: /home/worker
+service_account_group: service_group
+ssh_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+users:
+  ansible
