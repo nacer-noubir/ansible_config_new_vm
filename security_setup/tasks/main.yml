@@ -1,0 +1,56 @@
+# update system
+
+- name: Update yum package index
+  yum:
+    update_cache: yes
+
+- name: Upgrade all packages
+  yum:
+    name: "*"
+    state: latest
+
+- name: Remove unused packages and dependencies
+  yum:
+    autoremove: yes
+
+# Setup firewalld
+- name: Install firewalld
+  yum:
+    name: firewalld
+    state: present
+
+- name: Start and enable firewalld service
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+
+- name: Allow SSH through the firewall
+  firewalld:
+    service: ssh
+    zone: public
+    permanent: yes
+    state: enabled
+    immediate: yes
+
+- name: Allow HTTP and HTTPS traffic
+  firewalld:
+    service: "{{ item }}"
+    zone: public
+    permanent: yes
+    state: enabled
+    immediate: yes
+  loop:
+    - http
+    - https
+
+- name: Block all other incoming traffic by default
+  firewalld:
+    zone: public
+    default: reject
+    permanent: yes
+    immediate: yes
+
+- name: Reload firewalld to apply changes
+  firewalld:
+    state: reloaded

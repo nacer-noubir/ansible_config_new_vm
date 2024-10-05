@@ -1,33 +1,33 @@
-    - name: create service account group
-      group:
-        name: "{{ service_account_group }}"
-        state: present
-  
-    - name: Create User
-      user:
-        name: "{{ item }}"
-        groups: "{{ service_account_group }}"
-        password: "{{ service_account_password | password_hash('sha512') }}"
-        shell: "{{ service_account_shell}}"
-        createhome: yes
-      with_items: "{{ users }}"
+- name: create service account group
+  group:
+    name: "{{ service_account_group }}"
+    state: present
 
-    - name: Make sure we have a 'wheel' group
-      group:
-        name: wheel
-        state: present
+- name: Create User
+  user:
+    name: "{{ item }}"
+    groups: "{{ service_account_group }}"
+    password: "{{ lookup('hashi_vault', 'secret=' + SECRET +' token=' + TOKEN + ' url=' + URL ) }}"
+    shell: "{{ service_account_shell}}"
+    createhome: yes
+  with_items: "{{ users }}"
 
-    - name: Allow 'wheel' group to have passwordless sudo
-      lineinfile:
-        dest: /etc/sudoers
-        state: present
-        regexp: '^%wheel'
-        line: '%wheel ALL=(ALL) NOPASSWD: ALL'
-        validate: visudo -cf %s
+- name: Make sure we have a 'wheel' group
+  group:
+    name: wheel
+    state: present
 
-    - name: Add users to wheel group
-      user:
-        name: "{{ item }}"
-        groups: wheel
-        append: yes
-      with_items: "{{ users }}"
+- name: Allow 'wheel' group to have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: "^%wheel"
+    line: "%wheel ALL=(ALL) NOPASSWD: ALL"
+    validate: visudo -cf %s
+
+- name: Add users to wheel group
+  user:
+    name: "{{ item }}"
+    groups: wheel
+    append: yes
+  with_items: "{{ users }}"

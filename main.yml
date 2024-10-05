@@ -9,3 +9,9 @@
   roles:
   - { role: ssh_setup, tags: ssh_setup}
   become: true
+
+- hosts: all
+  name: security_setting
+  roles:
+  - { role: security_setup, tags: security}
+  become: true

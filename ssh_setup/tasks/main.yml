@@ -1,4 +1,3 @@
-
   - name: Set up SSH directory
     file:
       path: "/home/{{ item }}/.ssh"
@@ -35,5 +34,3 @@
       name: sshd
       state: restarted
     when: update_result.changed
-
-      
